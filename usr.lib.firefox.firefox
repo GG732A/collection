@@ -1,0 +1,135 @@
+# this needs an overhaul
+# Last Modified: Thu Apr 15 02:07:09 2021
+#include <tunables/global>
+@{PID}={[1-9],[1-9][0-9],[1-9][0-9][0-9],[1-9][0-9][0-9][0-9],[1-9][0-9][0-9][0-9][0-9],[1-9][0-9][0-9][0-9][0-9][0-9],[1-4][0-9][0-9][0-9][0-9][0-9][0-9]}
+
+
+/usr/lib/firefox/firefox {
+ # Firefox
+  /usr/lib/firefox/firefox mrix,
+  /usr/lib/firefox/** r,
+  /usr/lib/firefox/fonts/.uuid* w,
+  /usr/lib/firefox-addons/distribution/extensions/{,**} r,
+  /usr/lib/firefox/*.so m,
+  /etc/firefox/syspref.js r,
+ # Libraries
+  /etc/ld.so.cache r,
+  /etc/ld.so.conf{,.d/,.d/**} r,
+  /etc/ld.so.preload r,
+  /usr/lib/x86_64-linux-gnu/*.so{,.*} mr,
+  /usr/lib/x86_64-linux-gnu/gio/modules/{,*.so,giomodule.cache} mr,
+  /usr/lib/x86_64-linux-gnu/gdk-pixbuf-*/*/loaders.cache r,
+  /usr/lib/x86_64-linux-gnu/gdk-pixbuf-*/*/loaders/*.so mr,
+  /usr/lib/x86_64-linux-gnu/gtk-3.0/3.0.0/immodules.cache r,
+  /usr/lib/x86_64-linux-gnu/gvfs/libgvfscommon.so mr,
+  /usr/lib/x86_64-linux-gnu/gconv/gconv-modules{,.cache} r,
+  /usr/lib/x86_64-linux-gnu/pulseaudio/*.so mr,
+  /usr/share/glib-*/schemas/gschemas.compiled r,
+ # Internet
+  network inet dgram,
+  network inet stream,
+  network inet6 dgram,
+  network inet6 stream,
+  network netlink raw,
+  network unix dgram,
+  network unix seqpacket,
+  network unix stream,
+ # Capabilities
+  capability sys_admin,
+  capability sys_chroot,
+  capability sys_ptrace,
+  ptrace (read,readby) peer=@{profile_name},
+  signal (send,receive) peer=@{profile_name},
+ # /dev
+  /dev/ r,
+  /dev/null w,
+  /dev/urandom r,
+ # /home
+  owner @{HOME}/.cache/fontconfig/*.cache* rw,
+  owner @{HOME}/.cache/mozilla/firefox/{,**} rw,
+  owner @{HOME}/.config/dconf/user r,
+  owner /run/user/*/dconf/user rw,
+  owner @{HOME}/.local/share/icons/{,**} r,
+  owner @{HOME}/.mozilla/firefox/{,**} rwk,
+  owner @{HOME}/.mozilla/firefox/*/.parentlock k,
+  owner @{HOME}/.Xauthority r,
+  # complains that it can't read the folder...
+  owner @{HOME}/Desktop/{,**} rw,
+  owner @{HOME}/Downloads/{,**} rw,
+ # /proc
+  owner /proc/@{PID}/cgroup r,
+  owner /proc/@{PID}/comm r,
+  owner /proc/@{PID}/fd/{,**} r,
+  owner /proc/@{PID}/gid_map w,
+  owner /proc/@{PID}/maps r,
+  owner /proc/@{PID}/mountinfo r,
+  owner /proc/@{PID}/setgroups w,
+  owner /proc/@{PID}/smaps r,
+  owner /proc/@{PID}/stat r,
+  owner /proc/@{PID}/statm r,
+  owner /proc/@{PID}/task/*/stat r,
+  owner /proc/@{PID}/uid_map w,
+  /proc/cpuinfo r,
+  /proc/devices r,
+  /proc/filesystems r,
+  /proc/meminfo r,
+  /proc/modules r,
+  /proc/stat r,
+ # /sys
+  /sys/bus/pci/devices/ r,
+  /sys/fs/cgroup/cpu,cpuacct/cpu.cfs_quota_us r,
+  /sys/devices/pci*/{*/,*/*/}{class,device,irq,resource,subsystem_device,subsystem_vendor,uevent,vendor} r,
+  /sys/devices/system/cpu/{,online,present,cpufreq/policy*/cpuinfo_max_freq,cpu*/cache/index*/size} r,
+  /sys/devices/system/memory/block_size_bytes r,
+ # /tmp
+  /tmp/firefox/{,**} rw,
+  /tmp/firefox/.parentlock k, 
+  /tmp/Temp-*/{,**} rw,
+  /tmp/mozilla_*0/{,**} rw,
+  owner /tmp/*.* wr,
+ # DNS
+  /etc/host{s,.conf} r,
+  /run/systemd/resolve/stub-resolv.conf r,
+ # DBus
+  /run/user/*/bus wr,
+  /run/dbus/system_bus_socket wr,
+  dbus (send) bus=system path=/org/freedesktop/DBus interface=org.freedesktop.DBus member={Hello,AddMatch,RemoveMatch,GetNameOwner,NameHasOwner} peer=(label=unconfined),
+ # GTK
+  /{etc,usr/local/share,usr/share}/fonts/{,**} r,
+  /{var/cache,usr/share}/fontconfig/{,**} r,
+  /usr/share/locale-langpack/*/LC_MESSAGES/*.mo r,
+  /usr/share/poppler/cMap/Adobe-*/{,**} r,
+  /usr/share/themes/*/*/gtk.css r,
+  /usr/share/icons/{,*/**} r,
+  /usr/share/pixmaps/{,**} r,
+  /usr/share/mime/** r,
+  /usr/share/hunspell/{,**} r,
+  /etc/gtk-*/**.ini r,
+ # Locale
+  /etc/locale.alias r,
+  /usr/lib/locale/{*.*/LC_*,*/LC_MESSAGES/**,locale-archive} r,
+  /usr/share/zoneinfo/*/* r,
+  /usr/share/X11/locale/locale.{alias,dir} r,
+  /usr/share/X11/locale/*.*/** r,
+ # X11
+  unix (receive, send, connect) peer=(addr=@/tmp/.X11-unix/*),
+  /tmp/.X11-unix/* rw,
+  /run/user/*/ICEauthority r,
+ # Display
+  /{etc,usr/share}/glvnd/egl_vendor.d/{,**} r,
+ # Noisy
+  deny /etc/nsswitch.conf r,
+  deny /etc/passwd r,
+  deny /usr/bin/lsb_release x,
+  deny ptrace (read,readby) peer=/usr/share/discord/Discord,
+
+  # Nvidia
+
+  /proc/driver/nvidia/params r,
+  /usr/share/nvidia/nvidia-application-profiles-*.*-rc r,
+  /dev/nvidia* rw,
+  /dev/dri/ r,
+  /dev/dri/** r,
+  /dev/dri/renderD128 w,
+  /run/nvidia-xdriver-* w,
+}
