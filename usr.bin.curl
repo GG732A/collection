@@ -1,0 +1,27 @@
+# Last Modified: Fri Apr 16 19:43:50 2021
+#include <tunables/global>
+
+/usr/bin/curl flags=(complain) {
+  #/usr/bin/curl mr,
+ # Libraries
+  /usr/lib/x86_64-linux-gnu/{*.so,*.so.*} mr,
+ # Networking
+  network inet dgram,
+  network inet stream,
+  network unix stream,
+  /etc/host.conf r,
+  /etc/ssl/certs/ca-certificates.crt r,
+  /etc/ssl/openssl.cnf r,
+  /run/systemd/resolve/stub-resolv.conf r,
+ # Noisy
+  deny network inet6 dgram,
+  deny network netlink raw,
+  deny ptrace (read,readby) peer=*,
+  deny /etc/gai.conf r,
+  deny /etc/ld.so.{cache,preload} r,
+  deny /etc/locale.alias r,
+  deny /etc/nsswitch.conf r,
+  deny /usr/lib/locale/locale-archive r,
+  deny /usr/share/zoneinfo/** r,
+
+}
