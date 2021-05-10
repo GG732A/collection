@@ -1,0 +1,117 @@
+#include <tunables/global>
+
+/usr/share/spotify/spotify flags=(attach_disconnected) {
+  #include <abstractions/base>
+  #include <abstractions/kde>
+  #include <abstractions/dbus>
+  #include <abstractions/dbus-session>
+  #include <abstractions/ibus>
+  #include <abstractions/dconf>
+  #include <abstractions/nameservice>
+
+  # Networking
+  network inet dgram,
+  network inet stream,
+  network unix dgram,
+
+  /run/firejail/lib/libtracelog.so mr,
+  /run/firejail/mnt/fslogger r,
+  
+  # Home folder
+  owner @{HOME}/.config/spotify/ rw,
+  owner @{HOME}/.config/pulse/{,**} rw,
+  owner @{HOME}/.config/spotify/** rwk,
+  owner @{HOME}/.cache/spotify/ rw,
+  owner @{HOME}/.cache/spotify/** rwk,
+  owner @{HOME}/.cache/nvidia/{,**} rwk,
+  owner @{HOME}/.local/share/spotify/ rw,
+  owner @{HOME}/.local/share/spotify/** rwk,
+  owner @{HOME}/.local/share/fonts/ r,
+  owner @{HOME}/.local/share/fonts/** r,
+  owner @{HOME}/.mozilla/plugins/ r,
+  owner @{HOME}/.mozilla/plugins/** r,
+  owner @{HOME}/.pki/{,**} rw,
+  owner @{HOME}/Music/{,**} r,
+ 
+  # Application and libraries
+  /usr/share/spotify/** mr,
+  /usr/share/spotify/spotify ix,
+  /usr/** mr,
+  /usr/bin/xdg-open Uxr,
+
+  owner /run/user/*/dconf/     w,
+  owner /run/user/*/dconf/user rw,
+
+  ptrace (trace) peer=@{profile_name},
+
+  owner @{HOME}/.pki/nssdb/* rwk,
+
+  owner /{dev,run}/shm/{,.}org.chromium.* mrw,
+
+  @{PROC}/ r,
+  @{PROC}/filesystems r,
+  @{PROC}/devices r,
+  @{PROC}/modules r,
+  @{PROC}/sys/kernel/shmmax r,
+  @{PROC}/{49,50,51}/comm r,
+  @{PROC}/[0-9][0-9]/task/[0-9][0-9]/status r,
+  owner @{PROC}/[0-9]*/auxv r,
+  owner @{PROC}/[0-9]*/comm r,
+  owner @{PROC}/[0-9]*/cmdline r,
+  owner @{PROC}/[0-9]*/fd/ r,
+  owner @{PROC}/[0-9]*/io r,
+  owner @{PROC}/[0-9]*/oom_{,score_}adj w,
+  owner @{PROC}/[0-9]*/smaps r,
+  owner @{PROC}/[0-9]*/stat r,
+  owner @{PROC}/[0-9]*/statm r,
+  owner @{PROC}/[0-9]*/status r,
+  owner @{PROC}/[0-9]*/task/ r,
+  owner @{PROC}/[0-9]*/task/[0-9]*/status r,
+  owner @{PROC}/[0-9]*/task/[0-9]*/stat r,
+  /proc/sys/fs/inotify/max_user_watches r,
+  /proc/sys/kernel/yama/ptrace_scope r,
+  /sys/bus/pci/devices/ r,
+  /sys/devices/virtual/tty/tty0/active r,
+  /sys/devices/system/cpu/{,online} r,
+  /sys/devices/system/memory/block_size_bytes r,
+  /sys/devices/system/node/{,**} r,
+  /sys/devices/pci[0-9]*/**/irq r,
+  /sys/devices/pci[0-9]*/**/config r,
+  /sys/devices/pci[0-9]*/**/class r,
+  /sys/devices/pci[0-9]*/**/resource r,
+  /sys/devices/pci[0-9]*/**/revision r,
+  /sys/devices/pci[0-9]*/**/subsystem_device r,
+  /sys/devices/pci[0-9]*/**/subsystem_vendor r,
+  /sys/devices/pci[0-9]*/**/vendor r,
+  /sys/devices/pci[0-9]*/**/removable r,
+  /sys/devices/pci[0-9]*/**/{,subsystem_}{device,vendor} r,
+
+  /etc/udev/udev.conf r,
+  deny /run/udev/data/** r,
+
+# Sound
+  /usr/lib/x86_64-linux-gnu/pulseaudio/*.so mr,
+  /usr/lib/x86_64-linux-gnu/alsa-lib/*.so mr,
+  /dev/snd/controlC{0,1} rw,
+  /usr/share/alsa/{,alsa.conf,cards/aliases.conf} r,
+  /etc/pulse/client.conf r,
+  /{etc,usr/share}/alsa/{,alsa.}conf.d/{,**} r,
+  /run/user/*/pulse/{,**} rw,
+  # Nvidia
+
+  /proc/driver/nvidia/params r,
+  /usr/share/nvidia/nvidia-application-profiles-*.*-rc r,
+  /dev/nvidia* rw,
+  /dev/dri/ r,
+  /dev/dri/** r,
+  /dev/dri/renderD128 w,
+  /run/nvidia-xdriver-* w,
+
+  unix (receive, send, connect) peer=(addr=@/tmp/.ICE-unix/*),
+
+  deny capability sys_admin,
+  deny ptrace (read,readby) peer={unconfined,/usr/bin/*,/usr/sbin/*,/usr/lib/**},
+  deny / rwklmx,
+  deny /{boot,opt,srv}/{,**} rwklmx,
+  deny /{bin,etc,sbin,usr,var}/{,**} wk,
+}
